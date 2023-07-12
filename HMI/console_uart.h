@@ -12,6 +12,7 @@ class Console_t
 		void Send(const char * message);
 		void Open(void);
 		void Receive(uint16_t size);
+		void SendInt(int num);
 };
 
 #endif
