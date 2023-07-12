@@ -5,6 +5,7 @@
 
 
 #define _2PI 6.28318530718f
+#define _constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 
 struct DQVoltage_s
 {
