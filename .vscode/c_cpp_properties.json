@@ -9,7 +9,8 @@
                 "Drivers/CMSIS/Device/ST/STM32F1xx/Include",
                 "Drivers/CMSIS/Include",
                 "User",
-                "HMI"
+                "HMI",
+                "Ctrl"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
