@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "MyFOC_V1.0",
+            "includePath": [
+                "Core/Inc",
+                "Drivers/STM32F1xx_HAL_Driver/Inc",
+                "Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
+                "Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+                "Drivers/CMSIS/Include",
+                "User",
+                "HMI"
+            ],
+            "defines": [
+                "USE_HAL_DRIVER",
+                "STM32F103xB"
+            ],
+            "compilerPath": "D:\\STM32_Tools\\mingw64\\bin\\gcc.exe"
+        }
+    ],
+    "version": 4
+}
