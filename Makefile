@@ -60,7 +60,8 @@ Core/Src/system_stm32f1xx.c
 
 CPP_SOURCES =  \
 User/user.cpp \
-HMI/led.cpp
+HMI/led.cpp \
+HMI/console_uart.cpp
 
 
 # ASM sources
