@@ -13,6 +13,7 @@ private:
     int dc_b;
     int dc_c;
 public:
+    int pole_pairs;
     float voltage_limit;
     float voltage_power_supply;
     DQVoltage_s voltage;

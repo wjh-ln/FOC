@@ -24,7 +24,7 @@ void BLDCMotor::velocityOpenloop(float target_velocity)
 
     shaft_angle = _normalizeAngle(shaft_angle + target_velocity * Ts);
 
-    setPhaseVoltage(voltage_limit/3, 0, _electricalAngle(shaft_angle, 7));
+    setPhaseVoltage(voltage_limit/3, 0, _electricalAngle(shaft_angle, pole_pairs));
 }
 
 void BLDCMotor::setPhaseVoltage(float Uq, float Ud, float angle_el)
