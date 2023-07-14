@@ -13,9 +13,11 @@ private:
     int dc_b;
     int dc_c;
 public:
+    float voltage_limit;
+    float voltage_power_supply;
     DQVoltage_s voltage;
     void move(float new_target);
-    float velocityOpenloop(float target_velocity);
+    void velocityOpenloop(float target_velocity);
     void setPhaseVoltage(float Uq, float Ud, float angle_el);
     void setPWM(float Ua, float Ub, float Uc);
     void driverInit(void);

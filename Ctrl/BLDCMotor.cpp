@@ -13,11 +13,10 @@ void BLDCMotor::driverInit(void)
 
 void BLDCMotor::move(float new_targat)
 {
-    voltage.d = 0;
-    voltage.q = velocityOpenloop(new_targat);
+        velocityOpenloop(new_targat);
 }
 
-float BLDCMotor::velocityOpenloop(float target_velocity)
+void BLDCMotor::velocityOpenloop(float target_velocity)
 {
     uint32_t _miros;
     _miros = getMicros();
@@ -25,9 +24,7 @@ float BLDCMotor::velocityOpenloop(float target_velocity)
 
     shaft_angle = _normalizeAngle(shaft_angle + target_velocity * Ts);
 
-    setPhaseVoltage(4, 0, _electricalAngle(shaft_angle, 7));
-    // HAL_Delay(50);
-    return _miros;
+    setPhaseVoltage(voltage_limit/3, 0, _electricalAngle(shaft_angle, 7));
 }
 
 void BLDCMotor::setPhaseVoltage(float Uq, float Ud, float angle_el)
@@ -37,9 +34,9 @@ void BLDCMotor::setPhaseVoltage(float Uq, float Ud, float angle_el)
     Ualpha = -Uq * sin(angle_el);
     Ubeta = Uq * cos(angle_el);
 
-    Ua = Ualpha + 8 / 2;
-    Ub = (sqrt(3) * Ubeta - Ualpha) / 2 + 8 / 2;
-    Uc = (-Ualpha - sqrt(3) * Ubeta) / 2 + 8 / 2;
+    Ua = Ualpha + voltage_limit / 2;
+    Ub = (sqrt(3) * Ubeta - Ualpha) / 2 + voltage_limit / 2;
+    Uc = (-Ualpha - sqrt(3) * Ubeta) / 2 + voltage_limit / 2;
 
     setPWM(Ua, Ub, Uc);
 
@@ -47,14 +44,10 @@ void BLDCMotor::setPhaseVoltage(float Uq, float Ud, float angle_el)
 
 void BLDCMotor::setPWM(float Ua, float Ub, float Uc)
 {
-    // Ua = _constrain(Ua, 0.0f, 6);
-    // Ub = _constrain(Ub, 0.0f, 6);
-    // Uc = _constrain(Uc, 0.0f, 6);
 
-    dc_a = Ua/11*1000;
-    dc_b = Ub/11*1000;
-    dc_c = Uc/11*1000;
-    // Console.SendThreeFloat(dc_a, dc_b, dc_c);
+    dc_a = Ua/voltage_power_supply*1000;
+    dc_b = Ub/voltage_power_supply*1000;
+    dc_c = Uc/voltage_power_supply*1000;
     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_1, dc_a);
     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_2, dc_b);
     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_3, dc_c);

@@ -10,9 +10,11 @@ void Main(void)
 {
     Console.Open();
     Motor.driverInit();
+    Motor.voltage_power_supply = 11.1;
+    Motor.voltage_limit = 8;
     while (1)
     {
-        Motor.move(50);
+        Motor.move(0.5);
         LED.Toggle();
     }
 }
