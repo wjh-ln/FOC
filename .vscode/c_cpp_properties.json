@@ -10,7 +10,8 @@
                 "Drivers/CMSIS/Include",
                 "User",
                 "HMI",
-                "Ctrl"
+                "Ctrl",
+                "Sensor"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
