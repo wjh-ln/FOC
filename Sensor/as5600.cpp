@@ -3,6 +3,7 @@
 
 void AS5600::init(void)
 {
+    angle_prev = getRawCount();
 }
 
 uint16_t AS5600::getRawCount(void)
@@ -13,7 +14,33 @@ uint16_t AS5600::getRawCount(void)
     HAL_I2C_Master_Receive(&hi2c1, AS5600_ADDR, read_buff, 2, 0xff);
     return ((uint16_t)read_buff[0] << 8) | (uint16_t)read_buff[1];
 }
+
 float AS5600::getSensorAngle(void)
 {
     return (getRawCount() / (float)cpr) * _2PI;
+}
+
+float AS5600::getSensorFullAngle(void)
+{
+    float d_angle, val;
+    val = getSensorAngle();
+    d_angle = val - angle_prev;
+    if (abs(d_angle) > (0.8f * _2PI))
+        full_rotations += (d_angle > 0) ? -1 : 1;
+    angle_prev = val;
+    return (float)full_rotations * _2PI + angle_prev;
+}
+
+int32_t AS5600::getSensorRotation(void)
+{
+    return full_rotations;
+}
+
+float AS5600::getSensorVelocity(void)
+{
+    uint32_t Ts = getMicros();
+    float angle_new = getSensorFullAngle();
+    float velocity = (angle_new - angle_vel_prev)/Ts;
+    angle_vel_prev = angle_new;
+    return velocity;
 }
