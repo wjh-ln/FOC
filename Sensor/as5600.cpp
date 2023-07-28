@@ -1,5 +1,6 @@
 #include "as5600.h"
 #include "foc_utils.h"
+#include "tim.h"
 
 void AS5600::init(void)
 {
@@ -38,7 +39,16 @@ int32_t AS5600::getSensorRotation(void)
 
 float AS5600::getSensorVelocity(void)
 {
-    uint32_t Ts = getMicros();
+    uint32_t now_us;
+    float Ts;
+    now_us = __HAL_TIM_GET_COUNTER(&htim4);
+    if (now_us < velocity_times_pre)
+    {
+        Ts = (0XFFFF - velocity_times_pre + now_us) * 1e-6f;
+    }
+    else Ts = (now_us - velocity_times_pre) * 1e-6f;
+    velocity_times_pre = now_us;
+
     float angle_new = getSensorFullAngle();
     float velocity = (angle_new - angle_vel_prev)/Ts;
     angle_vel_prev = angle_new;

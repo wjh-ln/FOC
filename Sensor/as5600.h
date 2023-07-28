@@ -13,7 +13,7 @@ private:
     float angle_prev = 0.0f; // angle used for full rotations
     float angle_vel_prev = 0.0f; // angle used for velocity
     int32_t full_rotations;
-
+    uint32_t velocity_times_pre;
 public:
     void init(void);
     uint16_t getRawCount(void);
