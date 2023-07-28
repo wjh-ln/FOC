@@ -13,8 +13,8 @@ struct DQVoltage_s
     float q;
 };
 
-void getMicrosInit(void);
-// uint32_t getMicros(void);
+void microsInit(void);
+uint32_t getMicros(void);
 float _normalizeAngle(float angle);
 float _electricalAngle(float shaft_angle, int pole_pairs);
 

@@ -30,6 +30,83 @@ void BLDCMotor::move(float new_targat)
     }
 }
 
+void BLDCMotor::linkSensor(AS5600 _sensor)
+{
+    // TODO: Uninitialized sensor connections are not considered
+    sensor = _sensor;
+}
+void BLDCMotor::initFOC(void)
+{
+    alignSensor();
+}
+void BLDCMotor::alignSensor(void)
+{
+    console.send("Align sensor.\n");
+    float mid_angle, end_angle;
+    float angle;
+    for (int16_t i = 0; i <= 500; i++)
+    {
+        angle = _3PI_2 + _2PI * i / 500.0;
+        setPhaseVoltage(voltage_limit / 3, 0, angle);
+        HAL_Delay(2);
+    }
+    mid_angle = sensor.getSensorFullAngle();
+    console.send("mid_angle:");
+    console.SendFloat(mid_angle);
+
+    for (int16_t i = 500; i >= 0; i--)
+    {
+        angle = _3PI_2 + _2PI * i / 500.0;
+        setPhaseVoltage(voltage_limit / 3, 0, angle);
+        HAL_Delay(2);
+    }
+    end_angle = sensor.getSensorFullAngle();
+    console.send("end_angle:");
+    console.SendFloat(end_angle);
+
+    setPhaseVoltage(0, 0, 0);
+    HAL_Delay(200);
+
+    float moved = fabs(mid_angle - end_angle);
+    if (moved < 0.06)
+    {
+        console.send("Failed to notice movement\n");
+        sensor_direction = UNKNOWN;
+    }
+
+    else if (mid_angle < end_angle)
+    {
+        console.send("sensor_direction==CCW\n");
+        sensor_direction = CCW;
+    }
+    else
+    {
+        console.send("sensor_direction==CW\n");
+        sensor_direction = CW;
+    }
+
+    console.send("pole_pairs check:\n");
+    if ((fabs(moved * pole_pairs - _2PI) > 0.5) && (moved != 0)) // 0.5 is arbitrary number it can be lower or higher!
+    {
+        console.send("fail - estimated pole_pairs:");
+
+        pole_pairs = _2PI / moved + 0.5; // round up to the nearest integer
+        console.send("%d", pole_pairs);
+    }
+    else
+        console.send("pole_pairs OK!\n");
+
+    setPhaseVoltage(voltage_limit / 3, 0, _3PI_2); // 计算零点偏移角度
+    HAL_Delay(700);
+    zero_electric_angle = _normalizeAngle(_electricalAngle(sensor_direction * sensor.getSensorAngle(), pole_pairs));
+    HAL_Delay(20);
+    console.send("zero_electric_angle:");
+    console.SendFloat(zero_electric_angle);
+
+    setPhaseVoltage(0, 0, 0);
+    HAL_Delay(200);
+}
+
 void BLDCMotor::loopFOC(void)
 {
     if (controller == velocity_openloop)
@@ -41,12 +118,13 @@ void BLDCMotor::velocityOpenloop(float target_velocity)
 {
     uint32_t now_us;
     float Ts;
-    now_us = __HAL_TIM_GET_COUNTER(&htim4);
+    now_us = getMicros();
     if (now_us < open_loop_times_pre)
     {
         Ts = (0XFFFF - open_loop_times_pre + now_us) * 1e-6f;
     }
-    else Ts = (now_us - open_loop_times_pre) * 1e-6f;
+    else
+        Ts = (now_us - open_loop_times_pre) * 1e-6f;
     open_loop_times_pre = now_us;
     shaft_angle = _normalizeAngle(shaft_angle + target_velocity * Ts);
 
