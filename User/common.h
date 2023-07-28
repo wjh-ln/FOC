@@ -4,4 +4,4 @@
 
 
 extern BLDCMotor Motor;
-extern Console_t Console;
+extern Console_t console;
