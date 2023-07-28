@@ -2,14 +2,17 @@
 #include "string.h"
 #include "stdio.h"
 #include "stdarg.h"
+#include "common.h"
 
 Console_t::Console_t(UART_HandleTypeDef *huart)
 {
 	Console_t::huart_m = huart;
 }
 
-void Console_t::Send(const char *str, ...)
+void Console_t::send(const char *str, ...)
 {
+    using namespace std;
+
     char send_buff[128];
     uint8_t buff_count = 0;
     va_list ap;
@@ -98,4 +101,13 @@ uint16_t _pow(int x, int y)
         sum *= x;
     }
     return sum;
+}
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) 
+{
+    if(huart == &huart1)                                       
+    {
+				LED.Toggle();
+				HAL_UARTEx_ReceiveToIdle_IT(&huart1,console.rev_buff,256);
+    }
 }
