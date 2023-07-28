@@ -219,7 +219,7 @@ clean:
 link.cfg = stlink.cfg
 mcu.cfg = stm32f1x.cfg
 flash: $(BUILD_DIR)/$(TARGET).elf
-	"D:/STM32_TOOLS/OPENOCD-20230621-0.12.0/BIN/OPENOCD.EXE" \
+	"openocd" \
 	 -f interface/$(link.cfg) \
 	 -f target/$(mcu.cfg) \
 	 -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
