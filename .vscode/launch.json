@@ -12,7 +12,8 @@
             "configFiles": [
                 "interface/stlink.cfg",
                 "target/stm32f1x.cfg"
-            ]
+            ],
+            "preLaunchTask": "flash"
         }
     ]
 }
