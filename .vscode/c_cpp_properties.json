@@ -17,7 +17,7 @@
                 "USE_HAL_DRIVER",
                 "STM32F103xB"
             ],
-            "compilerPath": "D:\\STM32_Tools\\mingw64\\bin\\gcc.exe"
+            "compilerPath": "D:/VSCode For STM32/w64devkit/bin/gcc.exe"
         }
     ],
     "version": 4
