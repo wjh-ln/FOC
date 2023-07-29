@@ -9,7 +9,7 @@ void microsInit(void)
 }
 uint32_t getMicros(void)
 {
-    return __HAL_TIM_GET_COUNTER(&htim4);;
+    return __HAL_TIM_GET_COUNTER(&htim4);
 }
 
 float _normalizeAngle(float angle)

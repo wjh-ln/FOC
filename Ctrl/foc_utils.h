@@ -3,6 +3,8 @@
 #include "math.h"
 #include "stdint.h"
 
+#define COUNT_PERIOD 0XFFFF
+
 #define _3PI_2 4.71238898038f
 #define _2PI 6.28318530718f
 #define _constrain(amt, low, high) ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
