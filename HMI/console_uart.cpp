@@ -65,21 +65,21 @@ void Console_t::SendInt(int num)
 {	    
 	char str[255];
     sprintf(str, "%d,\n", num);
-	HAL_UART_Transmit_IT(huart_m,(uint8_t*)str,strlen(str));
+	HAL_UART_Transmit(huart_m,(uint8_t*)str,strlen(str),255);
 }
 
 void Console_t::SendFloat(float num)
 {	    
-	char str[255];
+	char str[20];
     sprintf(str, "%f\n", num);
-	HAL_UART_Transmit_IT(huart_m,(uint8_t*)str,strlen(str));
+	HAL_UART_Transmit(huart_m,(uint8_t*)str,strlen(str),5);
 }
 
 void Console_t::SendThreeFloat(float num1,float num2,float num3)
 {	    
 	char str[255];
     sprintf(str, "%f,%f,%f\n", num1,num2,num3);
-	HAL_UART_Transmit_IT(huart_m,(uint8_t*)str,strlen(str));
+	HAL_UART_Transmit(huart_m,(uint8_t*)str,strlen(str),255);
 }
 
 void Console_t::Open(void)
