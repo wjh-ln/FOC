@@ -13,32 +13,17 @@ void BLDCMotor::driverInit(void)
     HAL_GPIO_WritePin(Drive_EN_GPIO_Port, Drive_EN_Pin, GPIO_PIN_SET);
 }
 
-// Motor running function
-// Performs the appropriate control process according to the type of setup controller.
-void BLDCMotor::move(float new_targat)
-{
-    switch (controller)
-    {
-    case velocity_openloop:
-        velocityOpenloop(new_targat);
-        break;
-    case angle:
-
-        break;
-    default:
-        break;
-    }
-}
-
 void BLDCMotor::linkSensor(AS5600 _sensor)
 {
     // TODO: Uninitialized sensor connections are not considered
     sensor = _sensor;
 }
+
 void BLDCMotor::initFOC(void)
 {
     alignSensor();
 }
+
 void BLDCMotor::alignSensor(void)
 {
     console.send("Align sensor.\n");
@@ -96,7 +81,7 @@ void BLDCMotor::alignSensor(void)
     else
         console.send("pole_pairs OK!\n");
 
-    setPhaseVoltage(voltage_limit / 3, 0, _3PI_2); // 计算零点偏移角度
+    setPhaseVoltage(voltage_limit / 3, 0, _3PI_2); // calculate the zero offset angle
     HAL_Delay(700);
     zero_electric_angle = _normalizeAngle(_electricalAngle(sensor_direction * sensor.getSensorAngle(), pole_pairs));
     HAL_Delay(20);
@@ -105,6 +90,39 @@ void BLDCMotor::alignSensor(void)
 
     setPhaseVoltage(0, 0, 0);
     HAL_Delay(200);
+}
+
+// Motor running function
+// Performs the appropriate control process according to the type of setup controller.
+void BLDCMotor::move(float new_targat)
+{
+    switch (controller)
+    {
+    case velocity_openloop:
+        velocityOpenloop(new_targat);
+        break;
+    case velocity:
+        velocityCloseloop(new_targat);
+        break;
+    default:
+        break;
+    }
+}
+
+float BLDCMotor::shaftAngle(void)
+{
+    return sensor_direction * LPF_angle(sensor.getSensorFullAngle());
+}
+
+float BLDCMotor::shaftVelocity(void)
+{
+    return sensor_direction * LPF_velocity(sensor.getSensorVelocity());
+    // return sensor_direction * sensor.getSensorVelocity();
+}
+
+float BLDCMotor::electricalAngle(void)
+{
+    return _normalizeAngle((float)(sensor_direction * pole_pairs) * sensor.getSensorAngle() - zero_electric_angle);
 }
 
 void BLDCMotor::loopFOC(void)
@@ -120,15 +138,23 @@ void BLDCMotor::velocityOpenloop(float target_velocity)
     float Ts;
     now_us = getMicros();
     if (now_us < open_loop_times_pre)
-    {
-        Ts = (0XFFFF - open_loop_times_pre + now_us) * 1e-6f;
-    }
+        Ts = (COUNT_PERIOD - open_loop_times_pre + now_us) * 1e-6f;
     else
         Ts = (now_us - open_loop_times_pre) * 1e-6f;
     open_loop_times_pre = now_us;
     shaft_angle = _normalizeAngle(shaft_angle + target_velocity * Ts);
+    voltage.q = voltage_limit / 3;
+    setPhaseVoltage(voltage.q, 0, _electricalAngle(shaft_angle, pole_pairs));
+}
 
-    setPhaseVoltage(voltage_limit / 3, 0, _electricalAngle(shaft_angle, pole_pairs));
+float electrical_angle;
+void BLDCMotor::velocityCloseloop(float target_velocity)
+{
+    shaft_velocity = shaftVelocity();
+
+    voltage.q = PID_velocity(target_velocity - shaft_velocity);
+    electrical_angle = electricalAngle();
+    setPhaseVoltage(voltage.q, 0, electrical_angle);
 }
 
 void BLDCMotor::setPhaseVoltage(float Uq, float Ud, float angle_el)
