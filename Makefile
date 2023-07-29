@@ -68,7 +68,8 @@ HMI/console_uart.cpp \
 Ctrl/BLDCMotor.cpp \
 Ctrl/foc_utils.cpp \
 Ctrl/pid.cpp \
-Sensor/as5600.cpp
+Sensor/as5600.cpp \
+Ctrl/lowpass_filter.cpp
 
 
 # ASM sources
