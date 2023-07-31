@@ -11,7 +11,8 @@
                 "User",
                 "HMI",
                 "Ctrl",
-                "Sensor"
+                "Sensor",
+                "IQmath/include"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
