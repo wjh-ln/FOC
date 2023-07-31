@@ -58,7 +58,25 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c \
 Core/Src/system_stm32f1xx.c \
 Core/Src/tim.c \
 Core/Src/i2c.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c
+Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c \
+IQmath/_IQNfunctions/_atoIQN.c \
+IQmath/_IQNfunctions/_IQNasin_acos.c \
+IQmath/_IQNfunctions/_IQNatan2.c \
+IQmath/_IQNfunctions/_IQNdiv.c \
+IQmath/_IQNfunctions/_IQNexp.c \
+IQmath/_IQNfunctions/_IQNfrac.c \
+IQmath/_IQNfunctions/_IQNlog.c \
+IQmath/_IQNfunctions/_IQNmpy.c \
+IQmath/_IQNfunctions/_IQNmpyIQX.c \
+IQmath/_IQNfunctions/_IQNrepeat.c \
+IQmath/_IQNfunctions/_IQNrmpy.c \
+IQmath/_IQNfunctions/_IQNrsmpy.c \
+IQmath/_IQNfunctions/_IQNsin_cos.c \
+IQmath/_IQNfunctions/_IQNsqrt.c \
+IQmath/_IQNfunctions/_IQNtables.c \
+IQmath/_IQNfunctions/_IQNtoa.c \
+IQmath/_IQNfunctions/_IQNtoF.c \
+IQmath/_IQNfunctions/_IQNversion.c
 
 
 CPP_SOURCES =  \
@@ -137,7 +155,8 @@ C_INCLUDES =  \
 -IUser \
 -IHMI \
 -ICtrl \
--ISensor
+-ISensor \
+-IIQmath/include
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections

@@ -1,7 +1,7 @@
 #include "foc_utils.h"
 #include "common.h"
-#include <math.h>
 #include "tim.h"
+#include "math.h"
 
 void microsInit(void)
 {

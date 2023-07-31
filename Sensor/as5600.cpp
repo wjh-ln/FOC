@@ -1,6 +1,7 @@
 #include "as5600.h"
 #include "foc_utils.h"
 #include "tim.h"
+#include "math.h"
 
 void AS5600::init(void)
 {

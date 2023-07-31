@@ -1,8 +1,8 @@
 #include "BLDCMotor.h"
 #include "common.h"
-#include "math.h"
 #include "tim.h"
-
+#include "IQmathLib.h"
+#include "math.h"
 // Driver Initialization
 // enable SimpleFOC and Start the PWM signal generation.
 void BLDCMotor::driverInit(void)
@@ -85,10 +85,15 @@ void BLDCMotor::alignSensor(void)
     HAL_Delay(700);
     zero_electric_angle = _normalizeAngle(_electricalAngle(sensor_direction * sensor.getSensorAngle(), pole_pairs));
     HAL_Delay(20);
-    console.send("zero_electric_angle:");
-    console.SendFloat(zero_electric_angle);
 
     setPhaseVoltage(0, 0, 0);
+    if (zero_electric_angle == 0)
+    {
+        zero_electric_angle = DEF_ZERO_ELECTIC_ANGLE;
+    }
+
+    console.send("zero_electric_angle:");
+    console.SendFloat(zero_electric_angle);
     HAL_Delay(200);
 }
 
@@ -147,32 +152,90 @@ void BLDCMotor::velocityOpenloop(float target_velocity)
     setPhaseVoltage(voltage.q, 0, _electricalAngle(shaft_angle, pole_pairs));
 }
 
-float electrical_angle;
 void BLDCMotor::velocityCloseloop(float target_velocity)
 {
     shaft_velocity = shaftVelocity();
 
     voltage.q = PID_velocity(target_velocity - shaft_velocity);
-    electrical_angle = electricalAngle();
+    float electrical_angle = electricalAngle();
     setPhaseVoltage(voltage.q, 0, electrical_angle);
 }
 
 void BLDCMotor::setPhaseVoltage(float Uq, float Ud, float angle_el)
 {
-    angle_el = _normalizeAngle(angle_el);
+    switch (foc_modulation)
+    {
+    case SinePWM:
+        angle_el = _normalizeAngle(angle_el);
 
-    Ualpha = -Uq * sin(angle_el);
-    Ubeta = Uq * cos(angle_el);
+        Ualpha = -Uq * sin(angle_el);
+        Ubeta = Uq * cos(angle_el);
 
-    Ua = Ualpha + voltage_limit / 2;
-    Ub = (sqrt(3) * Ubeta - Ualpha) / 2 + voltage_limit / 2;
-    Uc = (-Ualpha - sqrt(3) * Ubeta) / 2 + voltage_limit / 2;
+        Ua = Ualpha + voltage_limit / 2;
+        Ub = (sqrt(3) * Ubeta - Ualpha) / 2 + voltage_limit / 2;
+        Uc = (-Ualpha - sqrt(3) * Ubeta) / 2 + voltage_limit / 2;
+        break;
 
+    case SpaceVectorPWM:
+        float Uout;
+        // TODO:Ud==0 not considered
+        Uout = Uq / voltage_power_supply;
+        angle_el = _normalizeAngle(angle_el + _PI_2);
+        int sector = floor(angle_el / _PI_3) + 1;
+        float T1 = _SQRT3 * sin(sector * _PI_3 - angle_el) * Uout;
+        float T2 = _SQRT3 * sin(angle_el - (sector - 1.0f) * _PI_3) * Uout;
+        float T0 = 1 - T1 - T2;
+        float Ta, Tb, Tc;
+        switch (sector)
+        {
+        case 1:
+            Ta = T1 + T2 + T0 / 2;
+            Tb = T2 + T0 / 2;
+            Tc = T0 / 2;
+            break;
+        case 2:
+            Ta = T1 + T0 / 2;
+            Tb = T1 + T2 + T0 / 2;
+            Tc = T0 / 2;
+            break;
+        case 3:
+            Ta = T0 / 2;
+            Tb = T1 + T2 + T0 / 2;
+            Tc = T2 + T0 / 2;
+            break;
+        case 4:
+            Ta = T0 / 2;
+            Tb = T1 + T0 / 2;
+            Tc = T1 + T2 + T0 / 2;
+            break;
+        case 5:
+            Ta = T2 + T0 / 2;
+            Tb = T0 / 2;
+            Tc = T1 + T2 + T0 / 2;
+            break;
+        case 6:
+            Ta = T1 + T2 + T0 / 2;
+            Tb = T0 / 2;
+            Tc = T1 + T0 / 2;
+            break;
+        default: // possible error state
+            Ta = 0;
+            Tb = 0;
+            Tc = 0;
+        }
+        Ua = Ta * voltage_limit;
+        Ub = Tb * voltage_limit;
+        Uc = Tc * voltage_limit;
+        break;
+    }
     setPWM(Ua, Ub, Uc);
 }
 
 void BLDCMotor::setPWM(float Ua, float Ub, float Uc)
 {
+    Ua = _constrain(Ua, 0.0f, voltage_limit);
+    Ub = _constrain(Ub, 0.0f, voltage_limit);
+    Uc = _constrain(Uc, 0.0f, voltage_limit);
     dc_a = Ua / voltage_power_supply * 1000;
     dc_b = Ub / voltage_power_supply * 1000;
     dc_c = Uc / voltage_power_supply * 1000;

@@ -21,6 +21,11 @@ typedef enum
     CCW = -1     // counter clockwise
 } Direction;
 
+enum FOCModulationType : uint8_t {
+  SinePWM            = 0x00,     //!< Sinusoidal PWM modulation
+  SpaceVectorPWM     = 0x01,     //!< Space vector modulation method
+};
+
 class BLDCMotor
 {
 private:
@@ -43,6 +48,7 @@ public:
     uint32_t open_loop_times_pre;
     DQVoltage_s voltage;
     MotionControlType controller;
+    FOCModulationType foc_modulation;
     LowPassFilter LPF_velocity{DEF_VEL_FILTER_Tf};
     LowPassFilter LPF_angle{DEF_ANGLE_FILTER_Tf};
     PIDController PID_velocity{DEF_PID_VEL_P, DEF_PID_VEL_I, DEF_PID_VEL_D, DEF_PID_VEL_LIMIT};

@@ -3,10 +3,11 @@
 #include "stdio.h"
 #include "stdarg.h"
 #include "common.h"
+#include <stdlib.h>
 
 Console_t::Console_t(UART_HandleTypeDef *huart)
 {
-	Console_t::huart_m = huart;
+    Console_t::huart_m = huart;
 }
 
 void Console_t::send(const char *str, ...)
@@ -25,31 +26,31 @@ void Console_t::send(const char *str, ...)
             str++;
             switch (*str)
             {
-                case 'd':
-                    str++;
-                    int val = va_arg(ap, int);
-                    if (val < 0)
-                    {
-                        send_buff[buff_count] = '-';
-                        buff_count++;
-                        val = -val;
-                    }
-                    int val_cp = val;
-                    uint8_t count = 0;
-                    while (val_cp)
-                    {
-                        count++;
-                        val_cp /= 10;
-                    }
-                    while (count)
-                    {
-                        char ch = val / _pow(10, count - 1);
-                        val %= _pow(10, count - 1);
-                        send_buff[buff_count] = ch + '0';
-                        buff_count++;
-                        count--;
-                    }
-                    break;
+            case 'd':
+                str++;
+                int val = va_arg(ap, int);
+                if (val < 0)
+                {
+                    send_buff[buff_count] = '-';
+                    buff_count++;
+                    val = -val;
+                }
+                int val_cp = val;
+                uint8_t count = 0;
+                while (val_cp)
+                {
+                    count++;
+                    val_cp /= 10;
+                }
+                while (count)
+                {
+                    char ch = val / _pow(10, count - 1);
+                    val %= _pow(10, count - 1);
+                    send_buff[buff_count] = ch + '0';
+                    buff_count++;
+                    count--;
+                }
+                break;
             }
             break;
         default:
@@ -58,39 +59,38 @@ void Console_t::send(const char *str, ...)
             buff_count++;
         }
     }
-    HAL_UART_Transmit(huart_m, (uint8_t *)send_buff, buff_count,255);
+    HAL_UART_Transmit(huart_m, (uint8_t *)send_buff, buff_count, 255);
 }
 
 void Console_t::SendInt(int num)
-{	    
-	char str[255];
+{
+    char str[255];
     sprintf(str, "%d,\n", num);
-	HAL_UART_Transmit(huart_m,(uint8_t*)str,strlen(str),255);
+    HAL_UART_Transmit(huart_m, (uint8_t *)str, strlen(str), 255);
 }
 
 void Console_t::SendFloat(float num)
-{	    
-	char str[20];
+{
+    char str[20];
     sprintf(str, "%f\n", num);
-	HAL_UART_Transmit(huart_m,(uint8_t*)str,strlen(str),5);
+    HAL_UART_Transmit(huart_m, (uint8_t *)str, strlen(str), 5);
 }
 
-void Console_t::SendThreeFloat(float num1,float num2,float num3)
-{	    
-	char str[255];
-    sprintf(str, "%f,%f,%f\n", num1,num2,num3);
-	HAL_UART_Transmit(huart_m,(uint8_t*)str,strlen(str),255);
+void Console_t::SendThreeFloat(float num1, float num2, float num3)
+{
+    char str[255];
+    sprintf(str, "%f,%f,%f\n", num1, num2, num3);
+    HAL_UART_Transmit(huart_m, (uint8_t *)str, strlen(str), 255);
 }
 
 void Console_t::Open(void)
 {
-		HAL_UARTEx_ReceiveToIdle_IT(huart_m,rev_buff,256); 
-		HAL_UART_Transmit_IT(huart_m,(uint8_t *)"Console is open!\n",sizeof("Console is open!\n"));
+    HAL_UARTEx_ReceiveToIdle_IT(huart_m, rev_buff, 256);
+    HAL_UART_Transmit_IT(huart_m, (uint8_t *)"Console is open!\n", sizeof("Console is open!\n"));
 }
 
 void Console_t::Receive(uint16_t size)
 {
-	
 }
 
 uint16_t _pow(int x, int y)
@@ -103,11 +103,12 @@ uint16_t _pow(int x, int y)
     return sum;
 }
 
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) 
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-    if(huart == &huart1)                                       
+    if (huart == &huart1)
     {
-				LED.Toggle();
-				HAL_UARTEx_ReceiveToIdle_IT(&huart1,console.rev_buff,256);
+        LED.Toggle();
+        user_cmd = atof((const char*)console.rev_buff);
+        HAL_UARTEx_ReceiveToIdle_IT(&huart1, console.rev_buff, 256);      
     }
 }

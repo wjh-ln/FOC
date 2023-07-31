@@ -6,7 +6,7 @@
 class Console_t
 {
 	public:
-		uint8_t rev_buff[256];
+		uint8_t rev_buff[50];
 		UART_HandleTypeDef *huart_m;
 		Console_t(UART_HandleTypeDef *huart);
 		void send(const char *str, ...);
