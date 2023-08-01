@@ -104,11 +104,13 @@ void BLDCMotor::move(float new_targat)
     switch (controller)
     {
     case velocity_openloop:
-        velocityOpenloop(new_targat);
+        velocityOpenLoop(new_targat);
         break;
     case velocity:
-        velocityCloseloop(new_targat);
+        velocityCloseLoop(new_targat);
         break;
+    case angle:
+        angleCloseLoop(new_targat);
     default:
         break;
     }
@@ -130,14 +132,9 @@ float BLDCMotor::electricalAngle(void)
     return _normalizeAngle((float)(sensor_direction * pole_pairs) * sensor.getSensorAngle() - zero_electric_angle);
 }
 
-void BLDCMotor::loopFOC(void)
-{
-    if (controller == velocity_openloop)
-        return;
-}
 
 // Open-loop speed control of motors.
-void BLDCMotor::velocityOpenloop(float target_velocity)
+void BLDCMotor::velocityOpenLoop(float target_velocity)
 {
     uint32_t now_us;
     float Ts;
@@ -152,11 +149,22 @@ void BLDCMotor::velocityOpenloop(float target_velocity)
     setPhaseVoltage(voltage.q, 0, _electricalAngle(shaft_angle, pole_pairs));
 }
 
-void BLDCMotor::velocityCloseloop(float target_velocity)
+void BLDCMotor::velocityCloseLoop(float target_velocity)
 {
     shaft_velocity = shaftVelocity();
 
     voltage.q = PID_velocity(target_velocity - shaft_velocity);
+    float electrical_angle = electricalAngle();
+    setPhaseVoltage(voltage.q, 0, electrical_angle);
+}
+
+void BLDCMotor::angleCloseLoop(float target_angle)
+{
+    shaft_angle = shaftAngle();
+    float target_velocity = PID_angle(target_angle-shaft_angle);
+    shaft_velocity = shaftVelocity();
+    voltage.q = PID_velocity(target_velocity - shaft_velocity);
+
     float electrical_angle = electricalAngle();
     setPhaseVoltage(voltage.q, 0, electrical_angle);
 }
