@@ -14,7 +14,7 @@ void Main(void)
     Motor.voltage_power_supply = 11.1;
     Motor.voltage_limit = 10.0;
     Motor.pole_pairs = 7;
-    Motor.controller = velocity;
+    Motor.controller = angle;
     Motor.PID_velocity.output_limit = Motor.voltage_limit;
     Motor.foc_modulation = SpaceVectorPWM;
     microsInit();
@@ -27,7 +27,7 @@ void Main(void)
     while (1)
     {
         Motor.move(user_cmd); 
-        // LED.Toggle();    
+        LED.Toggle();    
     }
 }
 
