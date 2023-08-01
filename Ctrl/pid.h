@@ -9,7 +9,6 @@ private:
     float P;
     float I;
     float D;
-    float output_ramp;
     uint32_t timestamp_prev;
     float integral_prev;
     float error_prev;
