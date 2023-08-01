@@ -13,4 +13,7 @@
 #define DEF_PID_VEL_D 0.0f
 #define DEF_PID_VEL_LIMIT (DEF_POWER_SUPPLY)
 
+#define DEF_PID_ANGLE_P 40.0f
+#define DEF_VEL_LIM 60.0f 
+
 #endif
